@@ -1,0 +1,8 @@
+streamlit
+langchain
+langchain-google-genai
+langchain-experimental
+sqlalchemy
+python-dotenv
+pymysql
+pandas
