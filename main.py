@@ -1,24 +1,13 @@
-import os
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.utilities import SQLDatabase
 from langchain.chains import create_sql_query_chain
-from urllib.parse import quote_plus
 
-# Load environment variables
-load_dotenv()
-
-db_url = os.environ.get("DB_URL")
-
-# Database connection details
-DB_USER = os.environ.get("DB_USER")
-# DB_PASSWORD = os.environ.get("DB_PASSWORD")
-DB_HOST = os.environ.get("DB_HOST")
-DB_PORT = os.environ.get("DB_PORT")
-DB_NAME = os.environ.get("DB_NAME")
+# --- Load secrets from Streamlit ---
+db_url = st.secrets["DB_URL"]
+google_api_key = st.secrets["GOOGLE_API_KEY"]
 
 # Initialize SQLAlchemy engine and SQLDatabase
 try:
@@ -32,7 +21,7 @@ except Exception as e:
 try:
     llm = GoogleGenerativeAI(
         model="models/gemini-2.0-flash",
-        google_api_key=os.environ.get("GOOGLE_API_KEY", "")
+        google_api_key=google_api_key
     )
 except Exception as e:
     st.error(f"LLM initialization failed: {e}")
@@ -108,11 +97,13 @@ if "prefill_query" not in st.session_state:
 
 question = st.text_input("Enter your question or requirement:", value=st.session_state.prefill_query)
 
+# Clear history button
 if st.button("Clear History"):
     st.session_state.history = []
     st.session_state.total_tokens = 0
     st.success("History cleared!")
 
+# Initialize session state
 if "history" not in st.session_state:
     st.session_state.history = []
 if "total_tokens" not in st.session_state:
@@ -120,6 +111,7 @@ if "total_tokens" not in st.session_state:
 
 st.write(f"Total tokens used: {int(st.session_state.total_tokens)}")
 
+# Execute query
 if st.button("Execute") and question:
     cleaned_sql, result_df, raw_output = execute_question(question)
     if cleaned_sql and result_df is not None:
