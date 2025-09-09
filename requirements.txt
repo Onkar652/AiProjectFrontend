@@ -4,5 +4,5 @@ langchain-google-genai
 langchain-experimental
 sqlalchemy
 python-dotenv
-pymysql
+psycopg2-binary
 pandas
